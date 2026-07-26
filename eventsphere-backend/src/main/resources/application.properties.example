@@ -1,0 +1,5 @@
+spring.datasource.url=jdbc:postgresql://localhost:5432/eventsphere
+spring.datasource.username=your_db_username
+spring.datasource.password=your_db_password
+jwt.secret=replace_with_your_own_secret_key
+jwt.expiration=86400000

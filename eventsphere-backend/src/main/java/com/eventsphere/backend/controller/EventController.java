@@ -1,0 +1,101 @@
+package com.eventsphere.backend.controller;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.eventsphere.backend.dto.EventRequest;
+import com.eventsphere.backend.dto.EventResponse;
+import com.eventsphere.backend.entity.Event;
+import com.eventsphere.backend.entity.User;
+import com.eventsphere.backend.service.EventService;
+import com.eventsphere.backend.service.UserService;
+
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping("/events")
+public class EventController {
+
+    private final EventService eventService;
+    private final UserService userService;
+
+    public EventController(EventService eventService, UserService userService) {
+        this.eventService = eventService;
+        this.userService = userService;
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('ORGANIZER')")
+    public ResponseEntity<EventResponse> createEvent(@Valid @RequestBody EventRequest request,
+                                                       Authentication authentication) {
+        User organizer = userService.getByEmail(authentication.getName());
+
+        Event event = eventService.createEvent(
+                request.getTitle(), request.getDescription(), request.getLocation(),
+                request.getDate(), request.getCapacity(), organizer
+        );
+
+        return ResponseEntity.ok(toResponse(event));
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<List<EventResponse>> getAllEvents() {
+        List<EventResponse> events = eventService.getAllEvents()
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(events);
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ORGANIZER')")
+    public ResponseEntity<EventResponse> getEvent(@PathVariable Long id) {
+        Event event = eventService.getEventById(id);
+        return ResponseEntity.ok(toResponse(event));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ORGANIZER')")
+    public ResponseEntity<EventResponse> updateEvent(@PathVariable Long id,
+                                                        @Valid @RequestBody EventRequest request,
+                                                        Authentication authentication) {
+        User requester = userService.getByEmail(authentication.getName());
+
+        Event event = eventService.updateEvent(
+                id, request.getTitle(), request.getDescription(), request.getLocation(),
+                request.getDate(), request.getCapacity(), requester.getId()
+        );
+
+        return ResponseEntity.ok(toResponse(event));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ORGANIZER')")
+    public ResponseEntity<Void> deleteEvent(@PathVariable Long id, Authentication authentication) {
+        User requester = userService.getByEmail(authentication.getName());
+        eventService.deleteEvent(id, requester.getId());
+        return ResponseEntity.noContent().build();
+    }
+
+    private EventResponse toResponse(Event event) {
+        return new EventResponse(
+                event.getId(), event.getTitle(), event.getDescription(), event.getLocation(),
+                event.getDate(), event.getCapacity(), event.getStatus(),
+                event.getOrganizer().getId(), event.getOrganizer().getName(), event.getCreatedAt()
+        );
+    }
+}
