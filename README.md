@@ -67,4 +67,4 @@ npm run dev
 
 ---
 
-_Built as a portfolio project to demonstrate full-stack architecture, authentication, real-time features, and AI integration._
+\_Built as a portfolio project to demonstrate full-stack architecture, authentication, real-time features, and AI integration.
