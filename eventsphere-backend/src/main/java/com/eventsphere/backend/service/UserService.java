@@ -11,7 +11,6 @@ import com.eventsphere.backend.repository.UserRepository;
 
 @Service
 public class UserService {
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 

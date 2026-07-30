@@ -2,8 +2,10 @@ package com.eventsphere.backend.controller;
 
 import com.eventsphere.backend.dto.RegistrationResponse;
 import com.eventsphere.backend.entity.Registration;
+import com.eventsphere.backend.entity.Ticket;
 import com.eventsphere.backend.entity.User;
 import com.eventsphere.backend.service.RegistrationService;
+import com.eventsphere.backend.service.TicketService;
 import com.eventsphere.backend.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,10 +20,13 @@ public class RegistrationController {
 
     private final RegistrationService registrationService;
     private final UserService userService;
+    private final TicketService ticketService;
 
-    public RegistrationController(RegistrationService registrationService, UserService userService) {
+    public RegistrationController(RegistrationService registrationService, UserService userService,
+                                   TicketService ticketService) {
         this.registrationService = registrationService;
         this.userService = userService;
+        this.ticketService = ticketService;
     }
 
     @PostMapping("/events/{id}/register")
@@ -43,9 +48,11 @@ public class RegistrationController {
     }
 
     private RegistrationResponse toResponse(Registration r) {
+        Ticket ticket = ticketService.getTicketByRegistrationId(r.getId());
         return new RegistrationResponse(
                 r.getId(), r.getEvent().getId(), r.getEvent().getTitle(),
-                r.getUser().getId(), r.getUser().getName(), r.getStatus(), r.getRegisteredAt()
+                r.getUser().getId(), r.getUser().getName(), r.getStatus(),
+                r.getRegisteredAt(), ticket.getQrCode()
         );
     }
 }

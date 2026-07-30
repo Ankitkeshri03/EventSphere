@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../services/api';
 
 function EventList() {
@@ -29,7 +30,7 @@ function EventList() {
       {events.length === 0 && <p>No events yet.</p>}
       {events.map((event) => (
         <div key={event.id} style={{ border: '1px solid #ccc', padding: 12, marginBottom: 8 }}>
-          <h3>{event.title}</h3>
+          <h3><Link to={`/events/${event.id}`}>{event.title}</Link></h3>
           <p>{event.location} — {new Date(event.date).toLocaleString()}</p>
           <p>Organized by {event.organizerName}</p>
         </div>

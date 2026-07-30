@@ -61,7 +61,6 @@ public class EventController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ORGANIZER')")
     public ResponseEntity<EventResponse> getEvent(@PathVariable Long id) {
         Event event = eventService.getEventById(id);
         return ResponseEntity.ok(toResponse(event));

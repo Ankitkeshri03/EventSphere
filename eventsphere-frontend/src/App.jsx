@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import EventList from './pages/EventList';
+import EventDetail from './pages/EventDetail';
+import MyTickets from './pages/MyTickets';
 import CreateEvent from './pages/CreateEvent';
 import Login from './pages/Login';
 
@@ -10,6 +12,8 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/events" element={<EventList />} />
+        <Route path="/events/:id" element={<EventDetail />} />
+        <Route path="/my-tickets" element={<MyTickets />} />
         <Route path="/create-event" element={<CreateEvent />} />
         <Route path="/login" element={<Login />} />
       </Routes>

@@ -1,24 +1,27 @@
 package com.eventsphere.backend.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.eventsphere.backend.entity.Event;
 import com.eventsphere.backend.entity.Registration;
 import com.eventsphere.backend.entity.RegistrationStatus;
 import com.eventsphere.backend.entity.User;
 import com.eventsphere.backend.repository.RegistrationRepository;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class RegistrationService {
 
     private final RegistrationRepository registrationRepository;
     private final EventService eventService;
+    private final TicketService ticketService;
 
-    public RegistrationService(RegistrationRepository registrationRepository, EventService eventService) {
+    public RegistrationService(RegistrationRepository registrationRepository, EventService eventService , TicketService ticketService) {
         this.registrationRepository = registrationRepository;
         this.eventService = eventService;
+        this.ticketService = ticketService;
     }
 
     public Registration registerForEvent(Long eventId, User user) {
@@ -34,7 +37,11 @@ public class RegistrationService {
         registration.setStatus(RegistrationStatus.CONFIRMED);
         registration.setRegisteredAt(LocalDateTime.now());
 
-        return registrationRepository.save(registration);
+        Registration saved = registrationRepository.save(registration);
+
+        ticketService.issueTicket(saved);
+        return saved;
+
     }
 
     public List<Registration> getMyRegistrations(Long userId) {

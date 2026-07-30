@@ -12,9 +12,11 @@ public class RegistrationResponse {
     private String userName;
     private RegistrationStatus status;
     private LocalDateTime registeredAt;
+    private String qrCode;
 
     public RegistrationResponse(Long id, Long eventId, String eventTitle, Long userId,
-                                 String userName, RegistrationStatus status, LocalDateTime registeredAt) {
+                                 String userName, RegistrationStatus status, LocalDateTime registeredAt,
+                                 String qrCode) {
         this.id = id;
         this.eventId = eventId;
         this.eventTitle = eventTitle;
@@ -22,6 +24,7 @@ public class RegistrationResponse {
         this.userName = userName;
         this.status = status;
         this.registeredAt = registeredAt;
+        this.qrCode = qrCode;
     }
 
     public Long getId() { return id; }
@@ -31,4 +34,5 @@ public class RegistrationResponse {
     public String getUserName() { return userName; }
     public RegistrationStatus getStatus() { return status; }
     public LocalDateTime getRegisteredAt() { return registeredAt; }
+    public String getQrCode() { return qrCode; }
 }
