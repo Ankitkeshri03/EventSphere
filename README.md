@@ -59,8 +59,8 @@ npm run dev
 - [x] Project setup (Docker, Postgres, Spring Boot, React scaffolding)
 - [x] Authentication — register, login, JWT, protected routes
 - [x] Event management (create, browse, edit events)
-- [ ] Registration & QR ticketing
-- [ ] Attendance tracking
+- [x] Registration & QR ticketing
+- [x] Attendance tracking
 - [ ] Networking & real-time chat
 - [ ] AI-assisted features
 - [ ] Deployment
