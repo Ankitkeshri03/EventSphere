@@ -15,6 +15,7 @@ function Navbar() {
       <Link to="/events">Events</Link>
       <Link to="/create-event">Create event</Link>
       {token && <Link to="/my-tickets">My tickets</Link>}
+      {token && <Link to="/check-in">Check in</Link>}
       {token ? (
         <button onClick={handleLogout}>Log out</button>
       ) : (

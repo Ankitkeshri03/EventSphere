@@ -29,11 +29,13 @@ function EventList() {
       <h2>All events</h2>
       {events.length === 0 && <p>No events yet.</p>}
       {events.map((event) => (
-        <div key={event.id} style={{ border: '1px solid #ccc', padding: 12, marginBottom: 8 }}>
-          <h3><Link to={`/events/${event.id}`}>{event.title}</Link></h3>
-          <p>{event.location} — {new Date(event.date).toLocaleString()}</p>
-          <p>Organized by {event.organizerName}</p>
-        </div>
+        <Link key={event.id} to={`/events/${event.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+          <div style={{ border: '1px solid #ccc', padding: 12, marginBottom: 8 }}>
+            <h3>{event.title}</h3>
+            <p>{event.location} — {new Date(event.date).toLocaleString()}</p>
+            <p>Organized by {event.organizerName}</p>
+          </div>
+        </Link>
       ))}
     </div>
   );

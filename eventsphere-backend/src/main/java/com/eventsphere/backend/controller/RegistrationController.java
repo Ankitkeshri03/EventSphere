@@ -1,5 +1,16 @@
 package com.eventsphere.backend.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.eventsphere.backend.dto.RegistrationResponse;
 import com.eventsphere.backend.entity.Registration;
 import com.eventsphere.backend.entity.Ticket;
@@ -7,13 +18,6 @@ import com.eventsphere.backend.entity.User;
 import com.eventsphere.backend.service.RegistrationService;
 import com.eventsphere.backend.service.TicketService;
 import com.eventsphere.backend.service.UserService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 public class RegistrationController {
@@ -22,8 +26,7 @@ public class RegistrationController {
     private final UserService userService;
     private final TicketService ticketService;
 
-    public RegistrationController(RegistrationService registrationService, UserService userService,
-                                   TicketService ticketService) {
+    public RegistrationController(RegistrationService registrationService, UserService userService,TicketService ticketService) {
         this.registrationService = registrationService;
         this.userService = userService;
         this.ticketService = ticketService;

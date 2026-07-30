@@ -61,7 +61,7 @@ npm run dev
 - [x] Event management (create, browse, edit events)
 - [x] Registration & QR ticketing
 - [x] Attendance tracking
-- [ ] Networking & real-time chat
+- [x] Networking & real-time chat
 - [ ] AI-assisted features
 - [ ] Deployment
 
