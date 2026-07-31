@@ -6,6 +6,8 @@ import MyTickets from './pages/MyTickets';
 import CreateEvent from './pages/CreateEvent';
 import CheckIn from './pages/CheckIn';
 import Login from './pages/Login';
+import Chat from './pages/Chat';
+import Connections from './pages/Connections';
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
         <Route path="/create-event" element={<CreateEvent />} />
         <Route path="/check-in" element={<CheckIn />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/chat/:userId" element={<Chat />} />
+        <Route path="/connections" element={<Connections />} />
       </Routes>
     </BrowserRouter>
   );
