@@ -148,7 +148,3 @@ Every entity beyond `User` and `Event` exists because a previous entity created 
 - `Message` was deliberately made to depend on `Connection` (a message can only be sent if a connection exists)
 
 ---
-
-## 5. What's next
-
-Days 19–22 (in progress) add WebSocket-based real-time delivery on top of the `Message` model already built, followed by notifications. Later phases add AI-assisted event descriptions and recommendations (Spring AI), certificates, and finally full Docker/CI-CD deployment — each building on the same layered pattern established here.
