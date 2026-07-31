@@ -16,10 +16,13 @@ public class MessageService {
 
     private final MessageRepository messageRepository;
     private final ConnectionRepository connectionRepository;
+    private final NotificationService notificationService;
 
-    public MessageService(MessageRepository messageRepository, ConnectionRepository connectionRepository) {
+    public MessageService(MessageRepository messageRepository, ConnectionRepository connectionRepository,
+                           NotificationService notificationService) {
         this.messageRepository = messageRepository;
         this.connectionRepository = connectionRepository;
+        this.notificationService = notificationService;
     }
 
     public Message sendMessage(User sender, User receiver, String content) {
@@ -38,7 +41,14 @@ public class MessageService {
         message.setContent(content);
         message.setSentAt(LocalDateTime.now());
 
-        return messageRepository.save(message);
+        Message saved = messageRepository.save(message);
+
+        notificationService.createNotification(
+                receiver, "NEW_MESSAGE",
+                sender.getName() + " sent you a message"
+        );
+
+        return saved;
     }
 
     public List<Message> getConversation(Long userId, Long otherUserId) {

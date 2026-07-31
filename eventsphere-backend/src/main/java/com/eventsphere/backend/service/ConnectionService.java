@@ -15,10 +15,13 @@ public class ConnectionService {
 
     private final ConnectionRepository connectionRepository;
     private final UserService userService;
+    private final NotificationService notificationService;
 
-    public ConnectionService(ConnectionRepository connectionRepository, UserService userService) {
+    public ConnectionService(ConnectionRepository connectionRepository, UserService userService,
+                              NotificationService notificationService) {
         this.connectionRepository = connectionRepository;
         this.userService = userService;
+        this.notificationService = notificationService;
     }
 
     public Connection sendRequest(User sender, Long receiverId) {
@@ -42,7 +45,14 @@ public class ConnectionService {
         connection.setStatus(ConnectionStatus.PENDING);
         connection.setCreatedAt(LocalDateTime.now());
 
-        return connectionRepository.save(connection);
+        Connection saved = connectionRepository.save(connection);
+
+        notificationService.createNotification(
+                receiver, "CONNECTION_REQUEST",
+                sender.getName() + " sent you a connection request"
+        );
+
+        return saved;
     }
 
     public Connection respondToRequest(Long connectionId, Long requesterId, ConnectionStatus newStatus) {
