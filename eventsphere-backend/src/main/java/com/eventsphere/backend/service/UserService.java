@@ -1,6 +1,7 @@
 package com.eventsphere.backend.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -51,5 +52,15 @@ public class UserService {
     public User getById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    }
+
+    public User updateRole(Long userId, Role role) {
+        User user = getById(userId);
+        user.setRole(role);
+        return userRepository.save(user);
+    }
+
+    public List<User> getByRole(Role role) {
+        return userRepository.findByRole(role);
     }
 }

@@ -31,13 +31,13 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@Valid @RequestBody RegisterRequest request) {
-        Role role = Role.valueOf(request.getRole().toUpperCase());
-
+        // Self-registration always creates a PARTICIPANT — ORGANIZER is granted only
+        // via an approved organizer request, ADMIN is never self-assignable.
         User user = userService.registerUser(
                 request.getName(),
                 request.getEmail(),
                 request.getPassword(),
-                role
+                Role.PARTICIPANT
         );
 
         UserResponse response = new UserResponse(

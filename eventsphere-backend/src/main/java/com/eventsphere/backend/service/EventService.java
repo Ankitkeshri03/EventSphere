@@ -8,14 +8,29 @@ import org.springframework.stereotype.Service;
 
 import com.eventsphere.backend.entity.Event;
 import com.eventsphere.backend.entity.EventStatus;
+import com.eventsphere.backend.entity.Registration;
 import com.eventsphere.backend.entity.User;
+import com.eventsphere.backend.repository.AttendanceRepository;
 import com.eventsphere.backend.repository.EventRepository;
+import com.eventsphere.backend.repository.RegistrationRepository;
+import com.eventsphere.backend.repository.TicketRepository;
 
 @Service
 public class EventService {
 
     @Autowired
     private EventRepository eventRepository;
+
+    private final RegistrationRepository registrationRepository;
+    private final TicketRepository ticketRepository;
+    private final AttendanceRepository attendanceRepository;
+
+    public EventService(RegistrationRepository registrationRepository, TicketRepository ticketRepository,
+                         AttendanceRepository attendanceRepository) {
+        this.registrationRepository = registrationRepository;
+        this.ticketRepository = ticketRepository;
+        this.attendanceRepository = attendanceRepository;
+    }
 
 
 
@@ -43,6 +58,10 @@ public class EventService {
         return eventRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found: " + id));
     }
+    //Get events organized by a specific user
+    public List<Event> getEventsByOrganizer(Long organizerId) {
+        return eventRepository.findByOrganizerId(organizerId);
+    }
     //Update Event - Only the organizer can update the event
     public Event updateEvent(Long id, String title, String description, String location,
                               LocalDateTime date, Integer capacity, Long requesterId) {
@@ -67,6 +86,16 @@ public class EventService {
         if (!event.getOrganizer().getId().equals(requesterId)) {
             throw new SecurityException("You are not the organizer of this event");
         }
+
+        // Registrations/tickets/attendance all reference this event via FKs —
+        // clear them out first or the delete below violates referential integrity.
+        attendanceRepository.deleteAll(attendanceRepository.findByTicket_Registration_Event_Id(id));
+
+        List<Registration> registrations = registrationRepository.findByEventId(id);
+        for (Registration registration : registrations) {
+            ticketRepository.findByRegistrationId(registration.getId()).ifPresent(ticketRepository::delete);
+        }
+        registrationRepository.deleteAll(registrations);
 
         eventRepository.delete(event);
     }

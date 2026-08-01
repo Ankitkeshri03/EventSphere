@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.eventsphere.backend.entity.Connection;
 import com.eventsphere.backend.entity.ConnectionStatus;
+import com.eventsphere.backend.entity.Role;
 import com.eventsphere.backend.entity.User;
 import com.eventsphere.backend.repository.ConnectionRepository;
 
@@ -29,7 +30,15 @@ public class ConnectionService {
             throw new IllegalArgumentException("You cannot connect with yourself");
         }
 
+        if (sender.getRole() == Role.ADMIN) {
+            throw new IllegalStateException("Admins cannot send connection requests");
+        }
+
         User receiver = userService.getById(receiverId);
+
+        if (receiver.getRole() == Role.ADMIN) {
+            throw new IllegalStateException("You cannot send a connection request to an admin");
+        }
 
         boolean alreadyExists = connectionRepository
                 .existsBySenderIdAndReceiverIdOrSenderIdAndReceiverId(

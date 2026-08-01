@@ -1,22 +1,36 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import api from '../services/api';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Textarea from '../components/ui/Textarea';
 import Card from '../components/ui/Card';
 
-function CreateEvent() {
+// LocalDateTime from the backend (e.g. "2026-08-15T18:00:00") needs trimming
+// to "yyyy-MM-ddTHH:mm" for a native datetime-local input's value.
+function toDateTimeLocal(value) {
+  return value ? value.slice(0, 16) : '';
+}
+
+function EditEvent() {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    title: '',
-    description: '',
-    location: '',
-    date: '',
-    capacity: '',
-  });
+  const [form, setForm] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    api.get(`/events/${id}`).then((res) => {
+      const event = res.data;
+      setForm({
+        title: event.title || '',
+        description: event.description || '',
+        location: event.location || '',
+        date: toDateTimeLocal(event.date),
+        capacity: event.capacity ?? '',
+      });
+    });
+  }, [id]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -28,25 +42,25 @@ function CreateEvent() {
     setLoading(true);
 
     try {
-      await api.post('/events', {
+      await api.put(`/events/${id}`, {
         ...form,
         capacity: Number(form.capacity),
       });
-      navigate('/events');
+      navigate(`/events/${id}`);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create event');
+      setError(err.response?.data?.message || 'Failed to update event');
     } finally {
       setLoading(false);
     }
   };
 
+  if (!form) return <p className="text-sm text-slate-500 dark:text-slate-400">Loading event...</p>;
+
   return (
     <div className="mx-auto max-w-lg">
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">Create event</h2>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Fill in the details below — you can always edit them later.
-        </p>
+        <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">Edit event</h2>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Update the details below.</p>
       </div>
 
       <Card className="p-6 sm:p-8">
@@ -55,7 +69,6 @@ function CreateEvent() {
             label="Event title"
             name="title"
             type="text"
-            placeholder="e.g. Product Design Meetup"
             value={form.title}
             onChange={handleChange}
             required
@@ -65,7 +78,6 @@ function CreateEvent() {
             label="Description"
             name="description"
             rows={4}
-            placeholder="What's this event about? Who should come?"
             value={form.description}
             onChange={handleChange}
           />
@@ -74,7 +86,6 @@ function CreateEvent() {
             label="Location"
             name="location"
             type="text"
-            placeholder="Venue or address"
             value={form.location}
             onChange={handleChange}
           />
@@ -92,7 +103,6 @@ function CreateEvent() {
               label="Capacity"
               name="capacity"
               type="number"
-              placeholder="e.g. 100"
               value={form.capacity}
               onChange={handleChange}
               min="1"
@@ -107,7 +117,7 @@ function CreateEvent() {
           )}
 
           <Button type="submit" disabled={loading} className="mt-1 w-full" size="lg">
-            {loading ? 'Creating...' : 'Create event'}
+            {loading ? 'Saving...' : 'Save changes'}
           </Button>
         </form>
       </Card>
@@ -115,4 +125,4 @@ function CreateEvent() {
   );
 }
 
-export default CreateEvent;
+export default EditEvent;

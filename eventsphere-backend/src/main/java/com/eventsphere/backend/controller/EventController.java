@@ -15,11 +15,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.eventsphere.backend.dto.AdminEventResponse;
 import com.eventsphere.backend.dto.EventRequest;
 import com.eventsphere.backend.dto.EventResponse;
 import com.eventsphere.backend.entity.Event;
 import com.eventsphere.backend.entity.User;
 import com.eventsphere.backend.service.EventService;
+import com.eventsphere.backend.service.RegistrationService;
 import com.eventsphere.backend.service.UserService;
 
 import jakarta.validation.Valid;
@@ -30,10 +32,13 @@ public class EventController {
 
     private final EventService eventService;
     private final UserService userService;
+    private final RegistrationService registrationService;
 
-    public EventController(EventService eventService, UserService userService) {
+    public EventController(EventService eventService, UserService userService,
+                            RegistrationService registrationService) {
         this.eventService = eventService;
         this.userService = userService;
+        this.registrationService = registrationService;
     }
 
     @PostMapping
@@ -58,6 +63,34 @@ public class EventController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(events);
+    }
+
+    @GetMapping("/mine")
+    @PreAuthorize("hasRole('ORGANIZER')")
+    public ResponseEntity<List<EventResponse>> getMyEvents(Authentication authentication) {
+        User organizer = userService.getByEmail(authentication.getName());
+
+        List<EventResponse> events = eventService.getEventsByOrganizer(organizer.getId())
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(events);
+    }
+
+    @GetMapping("/overview")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<AdminEventResponse>> getEventsOverview() {
+        List<AdminEventResponse> overview = eventService.getAllEvents()
+                .stream()
+                .map(event -> new AdminEventResponse(
+                        event.getId(), event.getTitle(), event.getDate(), event.getLocation(), event.getCapacity(),
+                        event.getStatus(), event.getOrganizer().getId(), event.getOrganizer().getName(),
+                        registrationService.getEventRegistrations(event.getId()).size()
+                ))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(overview);
     }
 
     @GetMapping("/{id}")
