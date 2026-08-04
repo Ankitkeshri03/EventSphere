@@ -9,4 +9,5 @@ import com.eventsphere.backend.entity.Event;
 public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByOrganizerId(Long organizerId);
     List<Event> findByStatus(com.eventsphere.backend.entity.EventStatus status);
+    List<Event> findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String titleKeyword, String descKeyword);
 }

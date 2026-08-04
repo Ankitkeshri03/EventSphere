@@ -62,6 +62,10 @@ public class EventService {
     public List<Event> getEventsByOrganizer(Long organizerId) {
         return eventRepository.findByOrganizerId(organizerId);
     }
+    //Search events by title or description
+    public List<Event> searchEvents(String keyword) {
+        return eventRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword);
+    }
     //Update Event - Only the organizer can update the event
     public Event updateEvent(Long id, String title, String description, String location,
                               LocalDateTime date, Integer capacity, Long requesterId) {
