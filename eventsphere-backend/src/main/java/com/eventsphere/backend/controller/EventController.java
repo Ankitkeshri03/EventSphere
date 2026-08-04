@@ -22,6 +22,7 @@ import com.eventsphere.backend.dto.EventResponse;
 import com.eventsphere.backend.entity.Event;
 import com.eventsphere.backend.entity.User;
 import com.eventsphere.backend.service.EventService;
+import com.eventsphere.backend.service.RecommendationService;
 import com.eventsphere.backend.service.RegistrationService;
 import com.eventsphere.backend.service.UserService;
 
@@ -34,12 +35,15 @@ public class EventController {
     private final EventService eventService;
     private final UserService userService;
     private final RegistrationService registrationService;
+    private final RecommendationService recommendationService;
 
     public EventController(EventService eventService, UserService userService,
-                            RegistrationService registrationService) {
+                            RegistrationService registrationService,
+                            RecommendationService recommendationService) {
         this.eventService = eventService;
         this.userService = userService;
         this.registrationService = registrationService;
+        this.recommendationService = recommendationService;
     }
 
     @PostMapping
@@ -101,6 +105,16 @@ public class EventController {
                 .map(this::toResponse)
                 .collect(Collectors.toList());
 
+        return ResponseEntity.ok(events);
+    }
+
+    @GetMapping("/recommended")
+    public ResponseEntity<List<EventResponse>> getRecommendedEvents(Authentication authentication) {
+        User user = userService.getByEmail(authentication.getName());
+        List<EventResponse> events = recommendationService.getRecommendedEvents(user)
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(events);
     }
 

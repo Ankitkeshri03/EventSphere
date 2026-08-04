@@ -17,9 +17,26 @@ function CreateEvent() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleGenerateDescription = async () => {
+    if (!form.title) {
+      alert('Enter a title or some keywords first');
+      return;
+    }
+    setGenerating(true);
+    try {
+      const res = await api.post('/ai/generate-description', { keywords: form.title });
+      setForm({ ...form, description: res.data.description });
+    } catch (err) {
+      alert('Could not generate description');
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -61,14 +78,26 @@ function CreateEvent() {
             required
           />
 
-          <Textarea
-            label="Description"
-            name="description"
-            rows={4}
-            placeholder="What's this event about? Who should come?"
-            value={form.description}
-            onChange={handleChange}
-          />
+          <div>
+            <Textarea
+              label="Description"
+              name="description"
+              rows={4}
+              placeholder="What's this event about? Who should come?"
+              value={form.description}
+              onChange={handleChange}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleGenerateDescription}
+              disabled={generating}
+              className="mt-2 px-0!"
+            >
+              {generating ? 'Generating…' : '✨ Generate with AI'}
+            </Button>
+          </div>
 
           <Input
             label="Location"
