@@ -35,6 +35,7 @@ function Navbar() {
           <NavLink to="/events" className={linkClass}>Events</NavLink>
           {token && isOrganizer && <NavLink to="/my-events" className={linkClass}>My events</NavLink>}
           {token && isOrganizer && <NavLink to="/create-event" className={linkClass}>Create event</NavLink>}
+          {token && isParticipant && <NavLink to="/dashboard" className={linkClass}>Dashboard</NavLink>}
           {token && isParticipant && <NavLink to="/my-tickets" className={linkClass}>My tickets</NavLink>}
           {token && !isAdmin && <NavLink to="/connections" className={linkClass}>Connections</NavLink>}
           {token && isOrganizer && <NavLink to="/check-in" className={linkClass}>Check in</NavLink>}
