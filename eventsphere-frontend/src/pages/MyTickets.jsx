@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
 import Badge from '../components/ui/Badge';
+import Card from '../components/ui/Card';
 import { eventGradient } from '../utils/eventTheme';
 
 function TicketQr({ qrCode }) {
   const [imageUrl, setImageUrl] = useState(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let objectUrl;
@@ -13,13 +15,21 @@ function TicketQr({ qrCode }) {
       .then((res) => {
         objectUrl = URL.createObjectURL(res.data);
         setImageUrl(objectUrl);
-      });
+      })
+      .catch(() => setFailed(true));
 
     return () => {
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, [qrCode]);
 
+  if (failed) {
+    return (
+      <div className="flex h-28 w-28 items-center justify-center rounded-lg border border-red-200 bg-red-50 p-2 text-center text-xs text-red-500 dark:border-red-900 dark:bg-red-950 dark:text-red-400">
+        QR failed to load
+      </div>
+    );
+  }
   if (!imageUrl) {
     return <div className="h-28 w-28 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />;
   }
@@ -34,14 +44,17 @@ const statusTone = {
 function MyTickets() {
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     api.get('/registrations/me')
       .then((res) => setRegistrations(res.data))
+      .catch(() => setError('Could not load your tickets. Please try again.'))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <p className="text-sm text-slate-500 dark:text-slate-400">Loading your tickets...</p>;
+  if (error) return <p className="text-sm text-red-500">{error}</p>;
   if (registrations.length === 0) {
     return <p className="text-sm text-slate-500 dark:text-slate-400">You haven't registered for any events yet.</p>;
   }
@@ -52,10 +65,7 @@ function MyTickets() {
 
       <div className="flex flex-col gap-5">
         {registrations.map((r) => (
-          <div
-            key={r.id}
-            className="flex overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
-          >
+          <Card key={r.id} className="flex overflow-hidden">
             <div className={`w-2 shrink-0 bg-linear-to-b ${eventGradient(r.eventId)}`} />
 
             <Link to={`/events/${r.eventId}`} className="flex-1 p-5">
@@ -81,7 +91,7 @@ function MyTickets() {
             <div className="flex shrink-0 items-center justify-center p-4">
               <TicketQr qrCode={r.qrCode} />
             </div>
-          </div>
+          </Card>
         ))}
       </div>
     </div>

@@ -16,20 +16,23 @@ function EditEvent() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [form, setForm] = useState(null);
+  const [loadError, setLoadError] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    api.get(`/events/${id}`).then((res) => {
-      const event = res.data;
-      setForm({
-        title: event.title || '',
-        description: event.description || '',
-        location: event.location || '',
-        date: toDateTimeLocal(event.date),
-        capacity: event.capacity ?? '',
-      });
-    });
+    api.get(`/events/${id}`)
+      .then((res) => {
+        const event = res.data;
+        setForm({
+          title: event.title || '',
+          description: event.description || '',
+          location: event.location || '',
+          date: toDateTimeLocal(event.date),
+          capacity: event.capacity ?? '',
+        });
+      })
+      .catch((err) => setLoadError(err.response?.data?.message || 'Could not load this event.'));
   }, [id]);
 
   const handleChange = (e) => {
@@ -54,6 +57,7 @@ function EditEvent() {
     }
   };
 
+  if (loadError) return <p className="text-sm text-red-500">{loadError}</p>;
   if (!form) return <p className="text-sm text-slate-500 dark:text-slate-400">Loading event...</p>;
 
   return (

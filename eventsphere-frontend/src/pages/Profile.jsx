@@ -24,17 +24,22 @@ function StatTile({ icon: Icon, label, value }) {
 
 function Profile() {
   const [me, setMe] = useState(null);
+  const [error, setError] = useState('');
   const [stats, setStats] = useState(null);
+  const [statsError, setStatsError] = useState('');
 
   useEffect(() => {
-    api.get('/users/me').then((res) => setMe(res.data));
+    api.get('/users/me')
+      .then((res) => setMe(res.data))
+      .catch(() => setError('Could not load your profile. Please try again.'));
   }, []);
 
   useEffect(() => {
     if (!me) return;
 
+    let request;
     if (me.role === 'PARTICIPANT') {
-      Promise.all([api.get('/registrations/me'), api.get('/connections/me')]).then(
+      request = Promise.all([api.get('/registrations/me'), api.get('/connections/me')]).then(
         ([registrations, connections]) => {
           setStats({
             tickets: registrations.data.length,
@@ -43,7 +48,7 @@ function Profile() {
         }
       );
     } else if (me.role === 'ORGANIZER') {
-      Promise.all([api.get('/events/mine'), api.get('/connections/me')]).then(
+      request = Promise.all([api.get('/events/mine'), api.get('/connections/me')]).then(
         ([events, connections]) => {
           setStats({
             events: events.data.length,
@@ -52,7 +57,7 @@ function Profile() {
         }
       );
     } else if (me.role === 'ADMIN') {
-      Promise.all([
+      request = Promise.all([
         api.get('/organizer-requests'),
         api.get('/users/participants'),
         api.get('/users/organizers'),
@@ -64,8 +69,11 @@ function Profile() {
         });
       });
     }
+
+    request?.catch(() => setStatsError('Could not load your stats.'));
   }, [me]);
 
+  if (error) return <p className="text-sm text-red-500">{error}</p>;
   if (!me) return <p className="text-sm text-slate-500 dark:text-slate-400">Loading profile...</p>;
 
   return (
@@ -88,6 +96,10 @@ function Profile() {
           Member since {new Date(me.createdAt).toLocaleDateString(undefined, { dateStyle: 'long' })}
         </p>
       </Card>
+
+      {statsError && (
+        <p className="mt-6 text-sm text-red-500">{statsError}</p>
+      )}
 
       {stats && (
         <div className="mt-6 grid grid-cols-2 gap-4">

@@ -13,26 +13,34 @@ function MyEvents() {
   const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [deleteError, setDeleteError] = useState('');
   const [deletingId, setDeletingId] = useState(null);
 
   const load = () => api.get('/events/mine').then((res) => setEvents(res.data));
 
   useEffect(() => {
-    load().finally(() => setLoading(false));
+    load()
+      .catch(() => setError('Could not load your events. Please try again.'))
+      .finally(() => setLoading(false));
   }, []);
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this event? This cannot be undone.')) return;
+    setDeleteError('');
     setDeletingId(id);
     try {
       await api.delete(`/events/${id}`);
       await load();
+    } catch (err) {
+      setDeleteError(err.response?.data?.message || 'Could not delete this event.');
     } finally {
       setDeletingId(null);
     }
   };
 
   if (loading) return <p className="text-sm text-slate-500 dark:text-slate-400">Loading your events...</p>;
+  if (error) return <p className="text-sm text-red-500">{error}</p>;
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -43,6 +51,12 @@ function MyEvents() {
         </div>
         <Button size="sm" onClick={() => navigate('/create-event')}>Create event</Button>
       </div>
+
+      {deleteError && (
+        <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
+          {deleteError}
+        </p>
+      )}
 
       {events.length === 0 && (
         <p className="text-sm text-slate-500 dark:text-slate-400">You haven't created any events yet.</p>

@@ -15,6 +15,7 @@ function Dashboard() {
   const [registrations, setRegistrations] = useState([]);
   const [connections, setConnections] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     // Fired together, not sequentially - the three requests happen in
@@ -29,11 +30,15 @@ function Dashboard() {
         setRegistrations(regRes.data);
         setConnections(connRes.data);
       })
+      .catch(() => setError('Could not load your dashboard. Please try again.'))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
     return <p className="text-sm text-slate-500 dark:text-slate-400">Loading your dashboard...</p>;
+  }
+  if (error) {
+    return <p className="text-sm text-red-500">{error}</p>;
   }
 
   const acceptedConnections = connections.filter((c) => c.status === 'ACCEPTED');

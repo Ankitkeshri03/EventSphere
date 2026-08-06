@@ -10,18 +10,26 @@ function initials(name = '') {
 function AdminOrganizerRequests() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [actionError, setActionError] = useState('');
 
   const load = () => api.get('/organizer-requests').then((res) => setRequests(res.data));
 
   useEffect(() => {
-    load().finally(() => setLoading(false));
+    load()
+      .catch(() => setError('Could not load organizer requests. Please try again.'))
+      .finally(() => setLoading(false));
   }, []);
 
   const respond = (id, action) => {
-    api.post(`/organizer-requests/${id}/${action}`).then(load);
+    setActionError('');
+    api.post(`/organizer-requests/${id}/${action}`)
+      .then(load)
+      .catch((err) => setActionError(err.response?.data?.message || 'Could not respond to this request.'));
   };
 
   if (loading) return <p className="text-sm text-slate-500 dark:text-slate-400">Loading requests...</p>;
+  if (error) return <p className="text-sm text-red-500">{error}</p>;
 
   return (
     <div className="mx-auto max-w-lg">
@@ -29,6 +37,12 @@ function AdminOrganizerRequests() {
         <h2 className="text-2xl font-semibold text-slate-900 dark:text-white">Organizer requests</h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Pending applications to become an organizer.</p>
       </div>
+
+      {actionError && (
+        <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
+          {actionError}
+        </p>
+      )}
 
       {requests.length === 0 && (
         <p className="text-sm text-slate-500 dark:text-slate-400">No pending requests.</p>

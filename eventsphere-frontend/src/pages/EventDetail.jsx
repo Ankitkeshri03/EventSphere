@@ -17,6 +17,7 @@ function EventDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
+  const [loadError, setLoadError] = useState('');
   const [status, setStatus] = useState('');
   const [statusOk, setStatusOk] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -28,6 +29,7 @@ function EventDetail() {
   const [connections, setConnections] = useState([]);
   const [connectingId, setConnectingId] = useState(null);
   const [attendeeErrors, setAttendeeErrors] = useState({});
+  const [attendeesLoadError, setAttendeesLoadError] = useState('');
 
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
@@ -37,6 +39,7 @@ function EventDetail() {
   useEffect(() => {
     api.get(`/events/${id}`)
       .then((res) => setEvent(res.data))
+      .catch((err) => setLoadError(err.response?.data?.message || 'Could not load this event.'))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -54,13 +57,16 @@ function EventDetail() {
   }, [token]);
 
   const loadAttendeesAndConnections = () => {
+    setAttendeesLoadError('');
     Promise.all([
       api.get(`/events/${id}/attendees`),
       canConnect ? api.get('/connections/me') : Promise.resolve({ data: [] }),
-    ]).then(([attendeesRes, connectionsRes]) => {
-      setAttendees(attendeesRes.data);
-      setConnections(connectionsRes.data);
-    });
+    ])
+      .then(([attendeesRes, connectionsRes]) => {
+        setAttendees(attendeesRes.data);
+        setConnections(connectionsRes.data);
+      })
+      .catch(() => setAttendeesLoadError('Could not load attendees.'));
   };
 
   useEffect(() => {
@@ -110,6 +116,7 @@ function EventDetail() {
   };
 
   if (loading) return <p className="text-sm text-slate-500 dark:text-slate-400">Loading event...</p>;
+  if (loadError) return <p className="text-sm text-red-500">{loadError}</p>;
   if (!event) return <p className="text-sm text-slate-500 dark:text-slate-400">Event not found.</p>;
 
   const isOwner = me && event.organizerId === me.id;
@@ -208,7 +215,7 @@ function EventDetail() {
         </div>
       </Card>
 
-      {canBrowseAttendees && (attendees.length > 0 || role === 'ADMIN') && (
+      {canBrowseAttendees && (attendees.length > 0 || role === 'ADMIN' || attendeesLoadError) && (
         <Card className="mt-6 p-6">
           <h2 className="font-semibold text-slate-900 dark:text-white">
             {canConnect ? "Who's going" : 'Participants'}
@@ -219,7 +226,11 @@ function EventDetail() {
               : `Everyone registered for this event${attendees.length ? ` (${attendees.length})` : ''}.`}
           </p>
 
-          {attendees.length === 0 && (
+          {attendeesLoadError && (
+            <p className="mt-4 text-sm text-red-500">{attendeesLoadError}</p>
+          )}
+
+          {!attendeesLoadError && attendees.length === 0 && (
             <p className="mt-4 text-sm text-slate-400 dark:text-slate-500">No one has registered yet.</p>
           )}
 

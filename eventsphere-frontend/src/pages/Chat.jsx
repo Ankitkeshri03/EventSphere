@@ -17,19 +17,21 @@ function Chat() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const bottomRef = useRef(null);
 
   const otherName =
     location.state?.name || messages.find((m) => m.senderId !== myId)?.senderName || 'Chat';
 
-  // Who am I, so we know which side to render each bubble on
+  // Who am I (for bubble alignment) and the past history - loaded together
   useEffect(() => {
-    api.get('/users/me').then((res) => setMyId(res.data.id));
-  }, []);
-
-  // Load past history once, on page load
-  useEffect(() => {
-    api.get(`/chat/messages/${userId}`).then((res) => setMessages(res.data));
+    Promise.all([
+      api.get('/users/me').then((res) => setMyId(res.data.id)),
+      api.get(`/chat/messages/${userId}`).then((res) => setMessages(res.data)),
+    ])
+      .catch((err) => setLoadError(err.response?.data?.message || 'Could not load this conversation.'))
+      .finally(() => setLoading(false));
   }, [userId]);
 
   // Connect to the live socket once, on page load
@@ -58,6 +60,9 @@ function Chat() {
     sendSocketMessage(userId, input);
     setInput('');
   };
+
+  if (loading) return <p className="text-sm text-slate-500 dark:text-slate-400">Loading conversation...</p>;
+  if (loadError) return <p className="text-sm text-red-500">{loadError}</p>;
 
   return (
     <div className="mx-auto max-w-lg">

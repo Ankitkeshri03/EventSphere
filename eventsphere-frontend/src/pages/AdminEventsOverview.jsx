@@ -11,14 +11,17 @@ const statusTone = { PUBLISHED: 'success', DRAFT: 'neutral', CANCELLED: 'danger'
 function AdminEventsOverview() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     api.get('/events/overview')
       .then((res) => setEvents(res.data))
+      .catch(() => setError('Could not load events. Please try again.'))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <p className="text-sm text-slate-500 dark:text-slate-400">Loading events...</p>;
+  if (error) return <p className="text-sm text-red-500">{error}</p>;
 
   return (
     <div className="mx-auto max-w-2xl">

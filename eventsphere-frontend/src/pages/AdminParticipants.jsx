@@ -9,14 +9,17 @@ function initials(name = '') {
 function AdminParticipants() {
   const [participants, setParticipants] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     api.get('/users/participants')
       .then((res) => setParticipants(res.data))
+      .catch(() => setError('Could not load participants. Please try again.'))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <p className="text-sm text-slate-500 dark:text-slate-400">Loading participants...</p>;
+  if (error) return <p className="text-sm text-red-500">{error}</p>;
 
   return (
     <div className="mx-auto max-w-lg">

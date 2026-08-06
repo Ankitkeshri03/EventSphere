@@ -9,14 +9,17 @@ function initials(name = '') {
 function AdminOrganizers() {
   const [organizers, setOrganizers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     api.get('/users/organizers')
       .then((res) => setOrganizers(res.data))
+      .catch(() => setError('Could not load organizers. Please try again.'))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <p className="text-sm text-slate-500 dark:text-slate-400">Loading organizers...</p>;
+  if (error) return <p className="text-sm text-red-500">{error}</p>;
 
   return (
     <div className="mx-auto max-w-lg">

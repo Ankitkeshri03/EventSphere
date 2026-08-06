@@ -13,6 +13,8 @@ function Connections() {
   const [myId, setMyId] = useState(null);
   const [connections, setConnections] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [actionError, setActionError] = useState('');
 
   const loadConnections = () => {
     return api.get('/connections/me').then((res) => setConnections(res.data));
@@ -22,14 +24,20 @@ function Connections() {
     Promise.all([
       api.get('/users/me').then((res) => setMyId(res.data.id)),
       loadConnections(),
-    ]).finally(() => setLoading(false));
+    ])
+      .catch(() => setError('Could not load your connections. Please try again.'))
+      .finally(() => setLoading(false));
   }, []);
 
   const respond = (id, action) => {
-    api.post(`/connections/${id}/${action}`).then(loadConnections);
+    setActionError('');
+    api.post(`/connections/${id}/${action}`)
+      .then(loadConnections)
+      .catch((err) => setActionError(err.response?.data?.message || 'Could not respond to this request.'));
   };
 
   if (loading) return <p className="text-sm text-slate-500 dark:text-slate-400">Loading connections...</p>;
+  if (error) return <p className="text-sm text-red-500">{error}</p>;
 
   return (
     <div className="mx-auto max-w-lg">
@@ -39,6 +47,12 @@ function Connections() {
           People you've connected with at events, and requests awaiting your response.
         </p>
       </div>
+
+      {actionError && (
+        <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950 dark:text-red-400">
+          {actionError}
+        </p>
+      )}
 
       {connections.length === 0 && (
         <p className="text-sm text-slate-500 dark:text-slate-400">You have no connections yet.</p>
