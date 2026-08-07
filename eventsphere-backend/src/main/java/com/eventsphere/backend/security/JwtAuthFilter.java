@@ -16,6 +16,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.eventsphere.backend.service.JwtService;
 
+import io.jsonwebtoken.JwtException;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,21 +47,34 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         String token = authHeader.substring(7);
-        String email = jwtService.extractEmail(token); //// who is this?
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            if (jwtService.isTokenValid(token, email))  { //// is it genuine and not expired?
+        // Every read below parses the token, and jjwt throws on an expired,
+        // malformed or badly-signed one. Uncaught, that escaped the filter and
+        // surfaced as a 500 -- so a routine session expiry looked to the client
+        // like the server had broken. Catching it here leaves the request simply
+        // unauthenticated and lets Spring Security reject it normally.
+        try {
+            String email = jwtService.extractEmail(token); //// who is this?
 
-                String role = jwtService.extractRole(token); // what's their role?
-                var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                if (jwtService.isTokenValid(token, email))  { //// is it genuine and not expired?
 
-                var authToken = new UsernamePasswordAuthenticationToken(
-                        email, null, authorities
-                );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    String role = jwtService.extractRole(token); // what's their role?
+                    var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    var authToken = new UsernamePasswordAuthenticationToken(
+                            email, null, authorities
+                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (JwtException | IllegalArgumentException ex) {
+            // Debug, not error: an expired token is normal traffic, not a fault.
+            // Logging it at ERROR filled the logs with stack traces every time a
+            // stale browser tab polled.
+            logger.debug("Ignoring unusable JWT: " + ex.getMessage());
         }
 
         filterChain.doFilter(request, response);
