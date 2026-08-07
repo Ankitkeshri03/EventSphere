@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          # Without this every run re-downloads the whole dependency tree from
+          # Maven Central, which dominates the job's runtime.
+          cache: maven
+
+      # Tests are skipped deliberately: the only test is @SpringBootTest, which
+      # boots the full context and therefore needs a live Postgres plus a
+      # JWT_SECRET. Neither exists on a bare runner, so running it here would
+      # fail for environmental reasons rather than real defects. This job still
+      # catches every compile error. See the note in ci.yml's PR description
+      # about adding a postgres service container to run it for real.
+      - name: Build backend
+        working-directory: ./eventsphere-backend
+        run: ./mvnw clean package -DskipTests
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          # cache: npm needs to be told where the lockfile lives, since this is
+          # not a single-package repo rooted at the checkout directory.
+          cache-dependency-path: eventsphere-frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./eventsphere-frontend
+        run: npm ci
+
+      # Runs before the build: lint failures are the cheaper, more common
+      # breakage, so failing on them first gives faster feedback.
+      - name: Lint
+        working-directory: ./eventsphere-frontend
+        run: npm run lint
+
+      - name: Build frontend
+        working-directory: ./eventsphere-frontend
+        run: npm run build
