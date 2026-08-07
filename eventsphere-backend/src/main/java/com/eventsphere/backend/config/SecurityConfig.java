@@ -76,6 +76,11 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
+    // CORS preflights are already short-circuited by CorsFilter before these
+    // rules run, so this is belt-and-braces: it also covers a bare OPTIONS
+    // request that omits Access-Control-Request-Method and therefore isn't
+    // recognised as a preflight.
+    .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
     .requestMatchers("/auth/**").permitAll()
     .requestMatchers(org.springframework.http.HttpMethod.GET, "/events/**").permitAll()
     .requestMatchers("/ws/**").permitAll()
