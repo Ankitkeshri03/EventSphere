@@ -1,3 +1,6 @@
 .DS_Store
 *.java~
 .LCK*
+
+# Local secrets for docker compose (see .env.example)
+.env

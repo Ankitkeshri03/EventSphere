@@ -1,0 +1,23 @@
+# `COPY . .` in the Dockerfile would otherwise pull the HOST's node_modules into
+# the image. Those are macOS/arm64 binaries; the build runs on Alpine Linux, so
+# native deps would be wrong for the platform -- and it copies hundreds of MB
+# into the build context for no reason, since `npm ci` reinstalls them anyway.
+node_modules/
+
+# Built locally; stage 1 produces its own. Copying a stale host build risks
+# shipping older assets than the source in the same image.
+dist/
+
+# Local env files can carry keys. Vite inlines any VITE_* var into the public
+# bundle at build time, so anything here would end up readable in the browser.
+.env
+.env.*
+!.env.example
+
+.git
+.gitignore
+.vscode/
+.idea/
+.DS_Store
+npm-debug.log*
+coverage/

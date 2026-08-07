@@ -1,0 +1,27 @@
+# NOTE: application.properties is deliberately NOT excluded any more.
+# It used to hold literal secrets, so shipping it would have baked the DB
+# password, JWT secret and API key into an immutable image layer. It now holds
+# only ${PLACEHOLDER} references, so it is safe to ship -- and it has to ship,
+# because it is what maps names like GEMINI_API_KEY onto the property Spring
+# actually reads (spring.ai.openai.api-key). Without it in the image, that env
+# var would be silently ignored and startup would fail.
+#
+# The real secrets live in the repo-root .env, which is gitignored and is never
+# part of this build context (it sits above it), so it cannot leak in.
+
+# Build output - the image builds its own jar in stage 1, and copying a
+# host-built target/ in would both bloat the context and risk a stale jar.
+target/
+
+# Local tooling / VCS noise - never needed inside the build context.
+.git
+.gitignore
+.vscode/
+.idea/
+*.iml
+.DS_Store
+
+# Maven wrapper is unused here: the build stage brings its own Maven.
+.mvn/
+mvnw
+mvnw.cmd
