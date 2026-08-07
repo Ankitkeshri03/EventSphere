@@ -10,8 +10,10 @@
 
 package com.eventsphere.backend.config;
 
+import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -31,6 +33,14 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
+    // Comma-separated list of allowed browser origins. Defaults to local dev, so
+    // nothing changes locally; production sets CORS_ALLOWED_ORIGINS (Spring maps
+    // that env var onto this property) to add the deployed frontend.
+    // Without the deployed origin listed here the browser blocks every request,
+    // and the frontend looks broken even though the backend is healthy.
+    @Value("${cors.allowed-origins:http://localhost:*}")
+    private String allowedOrigins;
+
     public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
     }
@@ -43,7 +53,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:*"));
+        // .trim() matters: "a,b" and "a, b" are both natural to type into a
+        // dashboard env field, but an untrimmed " b" matches no origin at all
+        // and fails silently as a CORS block.
+        configuration.setAllowedOriginPatterns(
+                Arrays.stream(allowedOrigins.split(","))
+                        .map(String::trim)
+                        .filter(origin -> !origin.isEmpty())
+                        .toList());
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

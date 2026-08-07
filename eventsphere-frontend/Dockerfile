@@ -15,6 +15,14 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
+
+# Vite inlines VITE_* vars into the bundle at build time, so the backend URL has
+# to be chosen HERE, not at container start. Left unset it falls back to
+# localhost:8080, which is what docker compose needs. For a deployed image:
+#   docker build --build-arg VITE_API_URL=https://your-backend.onrender.com .
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 RUN npm run build
 
 # ---- Stage 2: Serve ----

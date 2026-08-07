@@ -1,10 +1,18 @@
 import { Client } from '@stomp/stompjs';
+import { API_BASE_URL } from './api';
+
+// Derived from the API URL rather than written out separately, so the two can
+// never drift apart -- and so the protocol always matches: http -> ws,
+// https -> wss. That pairing matters: a page served over HTTPS is blocked by
+// the browser if it opens a plain ws:// connection (mixed content), so a
+// hardcoded ws:// would break the moment the app is served over HTTPS.
+const WS_URL = `${API_BASE_URL.replace(/^http/, 'ws')}/ws`;
 
 let stompClient = null;
 
 export function connectSocket(onMessage, onError) {
   stompClient = new Client({
-    brokerURL: 'ws://localhost:8080/ws',
+    brokerURL: WS_URL,
     connectHeaders: {
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     },
