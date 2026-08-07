@@ -33,6 +33,7 @@ function CreateEvent() {
       const res = await api.post('/ai/generate-description', { keywords: form.title });
       setForm({ ...form, description: res.data.description });
     } catch (err) {
+      console.error(err);
       alert('Could not generate description');
     } finally {
       setGenerating(false);
