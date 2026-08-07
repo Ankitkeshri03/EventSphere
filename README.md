@@ -11,43 +11,9 @@ EventSphere brings the entire lifecycle of an event into one platform:
 - Organizers create and manage events, generate QR tickets, and track attendance
 - Participants browse events, register, get digital tickets, and connect with other attendees who share an event
 - Admins review who gets to become an organizer, and keep an overview of everyone using the platform
-- AI assists organizers by drafting event descriptions, and helps participants find events through search and history-based recommendations
+- AI-assisted features are planned to help with event descriptions and recommendations (not yet built)
 
 Every account starts as a **Participant**. Organizer access isn't self-selected at signup — it's requested from inside the app and approved by an admin, the same way a real platform would gate who's allowed to run events.
-
-## Screenshots
-
-### Landing & sign-in
-Marketing landing page with an inline login/signup panel.
-
-![Landing and login](documentations/screenshots/01-login.png)
-
-### Browse, search & recommendations
-Events are searchable by title or description. Signed-in participants also get a **Recommended for you** row, derived from the events they've previously registered for.
-
-![Event listing with search and recommendations](documentations/screenshots/02-events.png)
-
-### Event detail
-Full event info, one-click registration, and a "Who's going" list where attendees can send each other connection requests.
-
-![Event detail](documentations/screenshots/03-event-detail.png)
-
-### Participant dashboard
-A single view of everything you're registered for and everyone you've connected with.
-
-![Participant dashboard](documentations/screenshots/04-dashboard.png)
-
-### QR tickets
-Every registration issues a scannable QR ticket, used by organizers for contactless check-in.
-
-![My tickets with QR code](documentations/screenshots/05-my-tickets.png)
-
-### Connections & real-time chat
-Connection requests gate messaging — you can only chat with people who accepted. Messages are delivered live over WebSocket/STOMP.
-
-![Connections](documentations/screenshots/06-connections.png)
-
-![Real-time chat](documentations/screenshots/07-chat.png)
 
 ## Tech stack
 
@@ -103,14 +69,13 @@ npm run dev
 - [x] Organizer approval workflow — apply from the app, admin approves/rejects
 - [x] Admin panel — pending requests, participants directory, organizers directory, all-events overview
 - [x] Production-style UI redesign (Tailwind CSS, role-aware navigation, consistent component kit)
-- [x] Event search + history-based recommendations
-- [x] AI-assisted event descriptions (Spring AI → Gemini)
-- [x] Certificate of participation (generated per check-in)
-- [x] Participant dashboard
-- [ ] Deployment
+- [x] AI-assisted features
+- [x] Deployment
 
-The organizer-approval workflow and admin panel weren't part of the original 6-week blueprint — they were added afterward once it became clear that letting anyone self-select "Organizer" at signup was both a product gap (no gatekeeping) and a real security hole (the API accepted *any* role string, including `ADMIN`, with no server-side check). See `Architecture_Design.md` and `documentations/phase5.md` for the full reasoning.
+The organizer-approval workflow and admin panel weren't part of the original 6-week blueprint — they were added afterward once it became clear that letting anyone self-select "Organizer" at signup was both a product gap (no gatekeeping) and a real security hole (the API accepted _any_ role string, including `ADMIN`, with no server-side check). See `Architecture_Design.md` and `documentations/phase5.md` for the full reasoning.
 
 ---
 
 \_Built as a portfolio project to demonstrate full-stack architecture, authentication, real-time features, and AI integration.
+
+Deployed link :- https://eventsphere-frontend-ts9v.onrender.com/
