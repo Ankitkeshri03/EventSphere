@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Create an Axios instance with a base URL
 const api = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: "https://eventsphere-backend-o63e.onrender.com",
 });
 
 api.interceptors.request.use((config) => {
