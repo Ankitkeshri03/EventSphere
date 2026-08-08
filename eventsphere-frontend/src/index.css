@@ -1,17 +1,19 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 @theme {
   --font-sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
 }
 
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
 body {
   margin: 0;
   font-family: var(--font-sans);
-  @apply bg-slate-50 text-slate-700 dark:bg-slate-950 dark:text-slate-300;
+  @apply bg-white text-slate-700;
 }
 
 #root {

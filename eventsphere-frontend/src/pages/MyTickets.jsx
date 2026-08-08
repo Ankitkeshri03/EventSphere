@@ -83,9 +83,9 @@ function MyTickets() {
 
             {/* Perforation */}
             <div className="relative flex items-center">
-              <div className="absolute -top-3 left-1/2 h-6 w-6 -translate-x-1/2 rounded-full bg-slate-50 dark:bg-slate-950" />
+              <div className="absolute -top-3 left-1/2 h-6 w-6 -translate-x-1/2 rounded-full bg-white" />
               <div className="h-full border-l border-dashed border-slate-300 dark:border-slate-700" />
-              <div className="absolute -bottom-3 left-1/2 h-6 w-6 -translate-x-1/2 rounded-full bg-slate-50 dark:bg-slate-950" />
+              <div className="absolute -bottom-3 left-1/2 h-6 w-6 -translate-x-1/2 rounded-full bg-white" />
             </div>
 
             <div className="flex shrink-0 items-center justify-center p-4">
