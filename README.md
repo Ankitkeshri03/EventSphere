@@ -17,7 +17,7 @@ Every account starts as a **Participant**. Organizer access isn't self-selected 
 
 ## Tech stack
 
-- **Frontend:** React + Tailwind CSS
+- **Frontend:** React
 - **Backend:** Spring Boot (Java)
 - **Database:** PostgreSQL
 - **Caching:** Redis
